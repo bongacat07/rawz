@@ -1,3 +1,5 @@
+const std = @import("std");
+
 pub const Fd = struct {
     fd: i32,
 };
@@ -38,3 +40,26 @@ pub fn htons(port: u16) u16 {
 pub fn htonl(addr: u32) u32 {
     return @byteSwap(addr);
 }
+
+pub const Accept4Flags = struct {
+    nonblock: bool = false,
+    cloexec: bool = false,
+
+    const SOCK_NONBLOCK: u32 = 0x800;
+    const SOCK_CLOEXEC: u32 = 0x80000;
+
+    pub fn raw(self: Accept4Flags) u32 {
+        var flags: u32 = 0;
+
+        if (self.nonblock) flags |= SOCK_NONBLOCK;
+        if (self.cloexec) flags |= SOCK_CLOEXEC;
+
+        return flags;
+    }
+};
+
+pub const ShutdownHow = enum(u32) {
+    read = 0,
+    write = 1,
+    read_write = 2,
+};

@@ -1,11 +1,11 @@
 const std = @import("std");
-const types = @import("types.zig");
-const syscall = @import("syscall.zig");
-
+const types = @import("types/types.zig");
+const io = @import("io/io.zig");
+const syscall = @import("syscall/socket.zig");
 fn readn(fd: types.Fd, buf: []u8) !usize {
     var total: usize = 0;
     while (total < buf.len) {
-        const n = syscall.read(fd, buf[total..]) catch |err| switch (err) {
+        const n = io.read(fd, buf[total..]) catch |err| switch (err) {
             error.Interrupted => continue,
             else => return err,
         };
@@ -18,7 +18,7 @@ fn readn(fd: types.Fd, buf: []u8) !usize {
 fn writen(fd: types.Fd, buf: []const u8) !void {
     var total: usize = 0;
     while (total < buf.len) {
-        const n = syscall.write(fd, buf[total..]) catch |err| switch (err) {
+        const n = io.write(fd, buf[total..]) catch |err| switch (err) {
             error.Interrupted => continue,
             else => return err,
         };
@@ -27,11 +27,11 @@ fn writen(fd: types.Fd, buf: []const u8) !void {
 }
 
 fn handleClient(client: types.Fd) void {
-    defer syscall.close(client) catch {};
+    defer io.close(client) catch {};
     var buf: [4096]u8 = undefined;
 
     while (true) {
-        const n = syscall.read(client, &buf) catch |err| switch (err) {
+        const n = io.read(client, &buf) catch |err| switch (err) {
             error.Interrupted => continue,
             else => {
                 std.debug.print("read error: {s}\n", .{@errorName(err)});
@@ -48,7 +48,7 @@ fn handleClient(client: types.Fd) void {
 
 pub fn main() !void {
     const listener = try syscall.socket(.inet, .stream, .tcp);
-    defer syscall.close(listener) catch {};
+    defer io.close(listener) catch {};
 
     const addr_in = types.SockAddrIn{
         .port = types.htons(9000),
