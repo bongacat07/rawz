@@ -1,11 +1,11 @@
-const types = @import("../types/types.zig");
 const arch = @import("../arch/arch.zig");
 const errno = @import("../errno.zig");
+const types = @import("../types.zig");
 
 pub fn read(fd: types.Fd, buf: []u8) !usize {
     const ret = arch.impl.syscall3(
-        arch.num.SYS.read,
-        @as(usize, @intCast(fd.fd)),
+        arch.num.read,
+        @intCast(fd),
         @intFromPtr(buf.ptr),
         buf.len,
     );
@@ -28,8 +28,8 @@ pub fn read(fd: types.Fd, buf: []u8) !usize {
 
 pub fn write(fd: types.Fd, buf: []const u8) !usize {
     const ret = arch.impl.syscall3(
-        arch.num.SYS.write,
-        @as(usize, @intCast(fd.fd)),
+        arch.num.write,
+        @intCast(fd),
         @intFromPtr(buf.ptr),
         buf.len,
     );
@@ -52,7 +52,7 @@ pub fn write(fd: types.Fd, buf: []const u8) !usize {
 }
 
 pub fn close(fd: types.Fd) !void {
-    const ret = arch.impl.syscall1(arch.num.SYS.close, @as(usize, @intCast(fd.fd)));
+    const ret = arch.impl.syscall1(arch.num.close, @intCast(fd));
 
     if (ret < 0) {
         return switch (errno.fromRet(ret)) {

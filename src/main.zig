@@ -1,6 +1,6 @@
 const std = @import("std");
-const types = @import("types/types.zig");
-const io = @import("io/io.zig");
+const types = @import("types.zig");
+const io = @import("syscall/io.zig");
 const syscall = @import("syscall/socket.zig");
 fn readn(fd: types.Fd, buf: []u8) !usize {
     var total: usize = 0;

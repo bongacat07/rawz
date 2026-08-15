@@ -1,8 +1,6 @@
 const std = @import("std");
 
-pub const Fd = struct {
-    fd: i32,
-};
+pub const Fd = i32;
 
 pub const SocketType = enum(c_int) {
     stream = 1,
@@ -25,7 +23,7 @@ pub const SockAddrIn = extern struct {
     family: u16 = @intFromEnum(AddressFamily.inet),
     port: u16,
     addr: u32,
-    zero: [8]u8 = [_]u8{0} ** 8,
+    zero: [8]u8 = @splat(0),
 };
 
 pub const SockAddr = extern struct {
@@ -41,21 +39,12 @@ pub fn htonl(addr: u32) u32 {
     return @byteSwap(addr);
 }
 
-pub const Accept4Flags = struct {
-    nonblock: bool = false,
-    cloexec: bool = false,
-
-    const SOCK_NONBLOCK: u32 = 0x800;
-    const SOCK_CLOEXEC: u32 = 0x80000;
-
-    pub fn raw(self: Accept4Flags) u32 {
-        var flags: u32 = 0;
-
-        if (self.nonblock) flags |= SOCK_NONBLOCK;
-        if (self.cloexec) flags |= SOCK_CLOEXEC;
-
-        return flags;
-    }
+pub const Acccept4Flags = packed struct(u32) {
+    _pad1: u11 = 0,
+    nonblock: bool,
+    _pad2: u7 = 0,
+    cloexec: bool,
+    _pad3: u12 = 0,
 };
 
 pub const ShutdownHow = enum(u32) {

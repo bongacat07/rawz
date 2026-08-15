@@ -1,4 +1,4 @@
-const types = @import("../types/types.zig");
+const types = @import("../types.zig");
 const arch = @import("../arch/arch.zig");
 const errno = @import("../errno.zig");
 
@@ -8,10 +8,10 @@ pub fn socket(
     protocol: ?types.Protocol,
 ) !types.Fd {
     const ret = arch.impl.syscall3(
-        arch.num.SYS.socket,
-        @as(usize, @intCast(@intFromEnum(domain))),
-        @as(usize, @intCast(@intFromEnum(type_))),
-        @as(usize, @intCast(if (protocol) |p| @intFromEnum(p) else 0)),
+        arch.num.socket,
+        @intCast(@intFromEnum(domain)),
+        @intCast(@intFromEnum(type_)),
+        @intCast(if (protocol) |p| @intFromEnum(p) else 0),
     );
 
     if (ret < 0) {
@@ -24,16 +24,16 @@ pub fn socket(
         };
     }
 
-    return .{ .fd = @intCast(ret) };
+    return @intCast(ret);
 }
 
 pub fn listen(fd: types.Fd, backlog: i32) !void {
     if (backlog < 0) return error.InvalidArgument;
 
     const ret = arch.impl.syscall2(
-        arch.num.SYS.listen,
-        @as(usize, @intCast(fd.fd)),
-        @as(usize, @intCast(backlog)),
+        arch.num.listen,
+        @intCast(fd),
+        @intCast(backlog),
     );
     if (ret < 0) {
         return switch (errno.fromRet(ret)) {
@@ -47,10 +47,10 @@ pub fn listen(fd: types.Fd, backlog: i32) !void {
 
 pub fn bind(fd: types.Fd, addr: *const types.SockAddr, addrlen: u32) !void {
     const ret = arch.impl.syscall3(
-        arch.num.SYS.bind,
-        @as(usize, @intCast(fd.fd)),
+        arch.num.bind,
+        @intCast(fd),
         @intFromPtr(addr),
-        @as(usize, @intCast(addrlen)),
+        @intCast(addrlen),
     );
 
     if (ret < 0) {
@@ -68,8 +68,8 @@ pub fn bind(fd: types.Fd, addr: *const types.SockAddr, addrlen: u32) !void {
 
 pub fn accept(fd: types.Fd, addr: ?*types.SockAddr, addrlen: ?*u32) !types.Fd {
     const ret = arch.impl.syscall3(
-        arch.num.SYS.accept,
-        @as(usize, @intCast(fd.fd)),
+        arch.num.accept,
+        @intCast(fd),
         if (addr) |a| @intFromPtr(a) else 0,
         if (addrlen) |l| @intFromPtr(l) else 0,
     );
@@ -87,11 +87,11 @@ pub fn accept(fd: types.Fd, addr: ?*types.SockAddr, addrlen: ?*u32) !types.Fd {
         };
     }
 
-    return .{ .fd = @intCast(ret) };
+    return @intCast(ret);
 }
 
 pub fn accept4(fd: types.Fd, addr: ?*types.SockAddr, addrlen: ?*u32, flags: types.Accept4Flags) !types.Fd {
-    const ret = arch.impl.syscall4(arch.num.SYS.accept4, @as(usize, @intCast(fd.fd)), if (addr) |a| @intFromPtr(a) else 0, if (addrlen) |l| @intFromPtr(l) else 0, flags.raw());
+    const ret = arch.impl.syscall4(arch.num.accept4, @intCast(fd), if (addr) |a| @intFromPtr(a) else 0, if (addrlen) |l| @intFromPtr(l) else 0, flags.raw());
 
     if (ret < 0) {
         return switch (errno.fromRet(ret)) {
@@ -126,7 +126,7 @@ pub fn accept4(fd: types.Fd, addr: ?*types.SockAddr, addrlen: ?*u32, flags: type
             else => error.Unexpected,
         };
     }
-    return .{ .fd = @intCast(ret) };
+    return @intCast(ret);
 }
 
 pub fn connect(
@@ -135,8 +135,8 @@ pub fn connect(
     addrlen: u32,
 ) !void {
     const ret = arch.impl.syscall3(
-        arch.num.SYS.connect,
-        @as(usize, @intCast(fd.fd)),
+        arch.num.connect,
+        @intCast(fd),
         @intFromPtr(&addr),
         @as(usize, addrlen),
     );
@@ -179,8 +179,8 @@ pub fn connect(
 
 pub fn shutdown(fd: types.Fd, how: types.ShutdownHow) !void {
     const ret = arch.impl.syscall2(
-        arch.num.SYS.shutdown,
-        @as(usize, @intCast(fd.fd)),
+        arch.num.shutdown,
+        @intCast(fd),
         @intFromEnum(how),
     );
     if (ret < 0) {
