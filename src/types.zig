@@ -52,3 +52,60 @@ pub const ShutdownHow = enum(u32) {
     write = 1,
     read_write = 2,
 };
+
+pub const PollEvents = packed struct(u16) {
+    POLLIN: bool = false,
+    POLLPRI: bool = false,
+    POLLOUT: bool = false,
+    _pad1: u3 = 0,
+    POLLRDNORM: bool = false,
+    POLLRDBAND: bool = false,
+    POLLWRNORM: bool = false,
+    POLLWRBAND: bool = false,
+    POLLMSG: bool = false,
+    _pad2: u2 = 0,
+    POLLRDHUP: bool = false,
+    _pad3: u2 = 0,
+};
+
+pub const PollRevents = packed struct(u16) {
+    POLLIN: bool = false,
+    POLLPRI: bool = false,
+    POLLOUT: bool = false,
+    POLLERR: bool = false,
+    POLLHUP: bool = false,
+    POLLNVAL: bool = false,
+    POLLRDNORM: bool = false,
+    POLLRDBAND: bool = false,
+    POLLWRNORM: bool = false,
+    POLLWRBAND: bool = false,
+    POLLMSG: bool = false,
+    _pad4: u2 = 0,
+    POLLRDHUP: bool = false,
+    _pad5: u2 = 0,
+};
+
+pub const Pollfd = extern struct {
+    fd: Fd,
+    poll_events: PollEvents,
+    poll_revents: PollRevents,
+};
+
+pub const Timespec = extern struct {
+    sec: i64,
+    nsec: i64,
+
+    pub const zero: Timespec = .{ .sec = 0, .nsec = 0 };
+
+    pub fn init(sec: i64, nsec: i64) error{InvalidNanoseconds}!Timespec {
+        if (nsec < 0 or nsec > 999_999_999) return error.InvalidNanoseconds;
+        return .{ .sec = sec, .nsec = nsec };
+    }
+
+    pub fn fromMillis(ms: i64) Timespec {
+        return .{
+            .sec = @divTrunc(ms, 1000),
+            .nsec = @rem(ms, 1000) * 1_000_000,
+        };
+    }
+};
