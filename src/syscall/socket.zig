@@ -45,7 +45,7 @@ pub fn listen(fd: types.Fd, backlog: i32) !void {
     }
 }
 
-pub fn bind(fd: types.Fd, addr: *const types.SockAddr, addrlen: u32) !void {
+pub fn bind(fd: types.Fd, addr: *types.SockAddr, addrlen: u32) !void {
     const ret = arch.impl.syscall3(
         arch.num.bind,
         @intCast(fd),
@@ -187,6 +187,53 @@ pub fn shutdown(fd: types.Fd, how: types.ShutdownHow) !void {
         return switch (errno.fromRet(ret)) {
             .BADF => error.InvalidFD,
             .NOTSOCK => error.NotASocketFD,
+            .INVAL => error.InvalidArgument,
+            .NOTCONN => error.NotConnected,
+            else => error.Unexpected,
+        };
+    }
+}
+
+pub fn getsockname(
+    fd: types.Fd,
+    addr: *types.SockAddr,
+    addrlen: *u32,
+) !void {
+    const ret = arch.impl.syscall3(
+        arch.num.getsockname,
+        @intCast(fd),
+        @intFromPtr(addr),
+        @intFromPtr(addrlen),
+    );
+
+    if (ret < 0) {
+        return switch (errno.fromRet(ret)) {
+            .BADF => error.InvalidFD,
+            .NOTSOCK => error.NotASocketFD,
+            .FAULT => error.BadAddress,
+            .INVAL => error.InvalidArgument,
+            else => error.Unexpected,
+        };
+    }
+}
+
+pub fn getpeername(
+    fd: types.Fd,
+    addr: *types.SockAddr,
+    addrlen: *u32,
+) !void {
+    const ret = arch.impl.syscall3(
+        arch.num.getpeername,
+        @intCast(fd),
+        @intFromPtr(addr),
+        @intFromPtr(addrlen),
+    );
+
+    if (ret < 0) {
+        return switch (errno.fromRet(ret)) {
+            .BADF => error.InvalidFD,
+            .NOTSOCK => error.NotASocketFD,
+            .FAULT => error.BadAddress,
             .INVAL => error.InvalidArgument,
             .NOTCONN => error.NotConnected,
             else => error.Unexpected,
