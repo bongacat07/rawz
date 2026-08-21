@@ -91,7 +91,7 @@ pub fn accept(fd: types.Fd, addr: ?*types.SockAddr, addrlen: ?*u32) !types.Fd {
 }
 
 pub fn accept4(fd: types.Fd, addr: ?*types.SockAddr, addrlen: ?*u32, flags: types.Accept4Flags) !types.Fd {
-    const ret = arch.impl.syscall4(arch.num.accept4, @intCast(fd), if (addr) |a| @intFromPtr(a) else 0, if (addrlen) |l| @intFromPtr(l) else 0, flags.raw());
+    const ret = arch.impl.syscall4(arch.num.accept4, @intCast(fd), if (addr) |a| @intFromPtr(a) else 0, if (addrlen) |l| @intFromPtr(l) else 0, flags);
 
     if (ret < 0) {
         return switch (errno.fromRet(ret)) {

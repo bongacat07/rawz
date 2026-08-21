@@ -1,7 +1,9 @@
 const std = @import("std");
-const types = @import("types.zig");
-const io = @import("syscall/io.zig");
-const syscall = @import("syscall/socket.zig");
+
+const rawz = @import("root.zig");
+const types = rawz.types;
+const io = rawz.io;
+const syscall = rawz.socket;
 fn readn(fd: types.Fd, buf: []u8) !usize {
     var total: usize = 0;
     while (total < buf.len) {
@@ -54,7 +56,7 @@ pub fn main() !void {
         .port = types.htons(9000),
         .addr = 0,
     };
-    const addr: types.SockAddr = @bitCast(addr_in);
+    var addr: types.SockAddr = @bitCast(addr_in);
 
     try syscall.bind(listener, &addr, @sizeOf(types.SockAddr));
     try syscall.listen(listener, 128);

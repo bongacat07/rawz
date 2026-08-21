@@ -109,3 +109,20 @@ pub const Timespec = extern struct {
         };
     }
 };
+pub const SendFlags = packed struct(u32) {
+    oob: bool = false,
+    _pad1: u2 = 0,
+    dontroute: bool = false,
+    _pad2: u5 = 0,
+    dontwait: bool = false,
+    _pad3: u1 = 0,
+    eor: bool = false,
+    _pad4: u3 = 0,
+    nosignal: bool = false,
+    more: bool = false,
+    _pad5: u8 = 0,
+    confirm: bool = false,
+    _pad6: u1 = 0,
+    fastopen: bool = false,
+    _pad7: u2 = 0,
+};
