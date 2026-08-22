@@ -183,3 +183,41 @@ pub fn recv(
 
     return @intCast(ret);
 }
+
+pub fn recvfrom(
+    fd: types.Fd,
+    buf: []u8,
+    flags: types.SendFlags,
+    addr: *types.SockAddr,
+) !usize {
+    var addrlen: u32 = @sizeOf(types.SockAddr);
+
+    const ret = arch.impl.syscall6(
+        arch.num.recvfrom,
+        @intCast(fd),
+        @intFromPtr(buf.ptr),
+        buf.len,
+        @bitCast(flags),
+        @intFromPtr(addr),
+        @intFromPtr(&addrlen),
+    );
+
+    if (ret < 0) {
+        return switch (errno.fromRet(ret)) {
+            .BADF => error.InvalidFD,
+            .FAULT => error.BadBuffer,
+            .INTR => error.Interrupted,
+            .INVAL => error.InvalidArgument,
+            .AGAIN => error.WouldBlock,
+            .NOTSOCK => error.NotSocket,
+            .CONNREFUSED => error.ConnectionRefused,
+            .CONNRESET => error.ConnectionReset,
+            .NOTCONN => error.NotConnected,
+            .TIMEDOUT => error.TimedOut,
+            .OPNOTSUPP => error.OperationNotSupported,
+            else => error.Unexpected,
+        };
+    }
+
+    return @intCast(ret);
+}
