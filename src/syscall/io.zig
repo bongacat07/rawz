@@ -63,3 +63,88 @@ pub fn close(fd: types.Fd) !void {
         };
     }
 }
+
+pub fn send(fd: types.Fd, buf: []u8, flags: types.SendFlags) !usize {
+    const ret = arch.impl.syscall6(
+        arch.num.sendto,
+        @intCast(fd),
+        @intFromPtr(buf.ptr),
+        buf.len,
+        @bitCast(flags),
+        0,
+        0,
+    );
+
+    if (ret < 0) {
+        return switch (errno.fromRet(ret)) {
+            .BADF => error.InvalidFD,
+            .FAULT => error.BadBuffer,
+            .INTR => error.Interrupted,
+            .INVAL => error.InvalidArgument,
+            .AGAIN => error.WouldBlock,
+            .NOTSOCK => error.NotSocket,
+            .DESTADDRREQ => error.DestinationAddressRequired,
+            .ISCONN => error.AlreadyConnected,
+            .MSGSIZE => error.MessageTooLarge,
+            .NOBUFS => error.NoBufferSpace,
+            .NOMEM => error.OutOfMemory,
+            .NOTCONN => error.NotConnected,
+            .OPNOTSUPP => error.OperationNotSupported,
+            .PIPE => error.BrokenPipe,
+            .CONNRESET => error.ConnectionReset,
+            .ACCES => error.AccessDenied,
+            .NETDOWN => error.NetworkDown,
+            .NETUNREACH => error.NetworkUnreachable,
+            .HOSTUNREACH => error.HostUnreachable,
+            .EAFNOSUPPORT => error.AddressFamilyNotSupported,
+            else => error.Unexpected,
+        };
+    }
+
+    return @intCast(ret);
+}
+
+pub fn sendto(
+    fd: types.Fd,
+    buf: []u8,
+    flags: types.SendFlags,
+    addr: *const types.SockAddr,
+) !usize {
+    const ret = arch.impl.syscall6(
+        arch.num.sendto,
+        @intCast(fd),
+        @intFromPtr(buf.ptr),
+        buf.len,
+        @bitCast(flags),
+        @intFromPtr(addr),
+        @sizeOf(types.SockAddr),
+    );
+
+    if (ret < 0) {
+        return switch (errno.fromRet(ret)) {
+            .BADF => error.InvalidFD,
+            .FAULT => error.BadBuffer,
+            .INTR => error.Interrupted,
+            .INVAL => error.InvalidArgument,
+            .AGAIN => error.WouldBlock,
+            .NOTSOCK => error.NotSocket,
+            .DESTADDRREQ => error.DestinationAddressRequired,
+            .ISCONN => error.AlreadyConnected,
+            .MSGSIZE => error.MessageTooLarge,
+            .NOBUFS => error.NoBufferSpace,
+            .NOMEM => error.OutOfMemory,
+            .NOTCONN => error.NotConnected,
+            .OPNOTSUPP => error.OperationNotSupported,
+            .PIPE => error.BrokenPipe,
+            .CONNRESET => error.ConnectionReset,
+            .ACCES => error.AccessDenied,
+            .NETDOWN => error.NetworkDown,
+            .NETUNREACH => error.NetworkUnreachable,
+            .HOSTUNREACH => error.HostUnreachable,
+            .AFNOSUPPORT => error.AddressFamilyNotSupported,
+            else => error.Unexpected,
+        };
+    }
+
+    return @intCast(ret);
+}
