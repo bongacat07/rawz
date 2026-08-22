@@ -148,3 +148,38 @@ pub fn sendto(
 
     return @intCast(ret);
 }
+
+pub fn recv(
+    fd: types.Fd,
+    buf: []u8,
+    flags: types.SendFlags,
+) !usize {
+    const ret = arch.impl.syscall6(
+        arch.num.recvfrom,
+        @intCast(fd),
+        @intFromPtr(buf.ptr),
+        buf.len,
+        @bitCast(flags),
+        0,
+        0,
+    );
+
+    if (ret < 0) {
+        return switch (errno.fromRet(ret)) {
+            .BADF => error.InvalidFD,
+            .FAULT => error.BadBuffer,
+            .INTR => error.Interrupted,
+            .INVAL => error.InvalidArgument,
+            .AGAIN => error.WouldBlock,
+            .NOTSOCK => error.NotSocket,
+            .CONNREFUSED => error.ConnectionRefused,
+            .CONNRESET => error.ConnectionReset,
+            .NOTCONN => error.NotConnected,
+            .TIMEDOUT => error.TimedOut,
+            .OPNOTSUPP => error.OperationNotSupported,
+            else => error.Unexpected,
+        };
+    }
+
+    return @intCast(ret);
+}
