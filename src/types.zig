@@ -6,6 +6,25 @@ pub const SocketType = enum(c_int) {
     stream = 1,
     dgram = 2,
     raw = 3,
+    rdm = 4,
+    seqpacket = 5,
+    dccp = 6,
+    packet = 10,
+};
+
+pub const SocketFlags = struct {
+    nonblock: bool = false,
+    cloexec: bool = false,
+
+    const SOCK_NONBLOCK: c_int = 0o4000;
+    const SOCK_CLOEXEC: c_int = 0o2000000;
+
+    pub fn toInt(self: SocketFlags) c_int {
+        var v: c_int = 0;
+        if (self.nonblock) v |= SOCK_NONBLOCK;
+        if (self.cloexec) v |= SOCK_CLOEXEC;
+        return v;
+    }
 };
 
 pub const AddressFamily = enum(c_int) {
@@ -20,7 +39,7 @@ pub const Protocol = enum(c_int) {
 };
 
 pub const SockAddrIn = extern struct {
-    family: u16 = @intFromEnum(AddressFamily.inet),
+    family: u16 = @backingInt(AddressFamily.inet),
     port: u16,
     addr: u32,
     zero: [8]u8 = @splat(0),

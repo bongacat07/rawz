@@ -7,11 +7,21 @@ pub fn socket(
     type_: types.SocketType,
     protocol: ?types.Protocol,
 ) !types.Fd {
+    return socketFlags(domain, type_, .{}, protocol);
+}
+pub fn socketFlags(
+    domain: types.AddressFamily,
+    type_: types.SocketType,
+    flags: types.SocketFlags,
+    protocol: ?types.Protocol,
+) !types.Fd {
+    const type_bits: c_int = @backingInt(type_) | flags.toInt();
+
     const ret = arch.impl.syscall3(
         arch.num.socket,
-        @intCast(@intFromEnum(domain)),
-        @intCast(@intFromEnum(type_)),
-        @intCast(if (protocol) |p| @intFromEnum(p) else 0),
+        @intCast(@backingInt(domain)),
+        @intCast(type_bits),
+        @intCast(if (protocol) |p| @backingInt(p) else 0),
     );
 
     if (ret < 0) {
@@ -19,6 +29,7 @@ pub fn socket(
             .PERM, .ACCES => error.AccessDenied,
             .AFNOSUPPORT => error.AddressFamilyNotSupported,
             .PROTONOSUPPORT => error.ProtocolNotSupported,
+            .INVAL => error.InvalidArgument,
             .NFILE, .MFILE => error.SystemResources,
             else => error.Unexpected,
         };
@@ -181,7 +192,7 @@ pub fn shutdown(fd: types.Fd, how: types.ShutdownHow) !void {
     const ret = arch.impl.syscall2(
         arch.num.shutdown,
         @intCast(fd),
-        @intFromEnum(how),
+        @backingInt(how),
     );
     if (ret < 0) {
         return switch (errno.fromRet(ret)) {
