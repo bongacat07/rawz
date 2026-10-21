@@ -39,7 +39,7 @@ pub const Protocol = enum(c_int) {
 };
 
 pub const SockAddrIn = extern struct {
-    family: u16 = @backingInt(AddressFamily.inet),
+    family: u16 = @intFromEnum(AddressFamily.inet),
     port: u16,
     addr: u32,
     zero: [8]u8 = @splat(0),

@@ -15,13 +15,13 @@ pub fn socketFlags(
     flags: types.SocketFlags,
     protocol: ?types.Protocol,
 ) !types.Fd {
-    const type_bits: c_int = @backingInt(type_) | flags.toInt();
+    const type_bits: c_int = @intFromEnum(type_) | flags.toInt();
 
     const ret = arch.impl.syscall3(
         arch.num.socket,
-        @intCast(@backingInt(domain)),
+        @intCast(@intFromEnum(domain)),
         @intCast(type_bits),
-        @intCast(if (protocol) |p| @backingInt(p) else 0),
+        @intCast(if (protocol) |p| @intFromEnum(p) else 0),
     );
 
     if (ret < 0) {
@@ -192,7 +192,7 @@ pub fn shutdown(fd: types.Fd, how: types.ShutdownHow) !void {
     const ret = arch.impl.syscall2(
         arch.num.shutdown,
         @intCast(fd),
-        @backingInt(how),
+        @intFromEnum(how),
     );
     if (ret < 0) {
         return switch (errno.fromRet(ret)) {
