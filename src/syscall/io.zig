@@ -18,7 +18,7 @@ pub fn read(fd: types.Fd, buf: []u8) !usize {
             .INVAL => error.InvalidArgument,
             .IO => error.IOError,
             .AGAIN => error.WouldBlock,
-            .CONNRESET => error.ConnectionReset,
+            .ISDIR => error.IsDirectory,
             else => error.Unexpected,
         };
     }

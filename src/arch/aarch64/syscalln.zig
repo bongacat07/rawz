@@ -3,7 +3,7 @@ pub inline fn syscall1(number: usize, arg1: usize) isize {
         : [ret] "={x0}" (-> isize),
         : [arg1] "{x0}" (arg1),
           [number] "{x8}" (number),
-    );
+        : .{ .memory = true });
 }
 
 pub inline fn syscall2(number: usize, arg1: usize, arg2: usize) isize {
@@ -12,7 +12,7 @@ pub inline fn syscall2(number: usize, arg1: usize, arg2: usize) isize {
         : [arg1] "{x0}" (arg1),
           [arg2] "{x1}" (arg2),
           [number] "{x8}" (number),
-    );
+        : .{ .memory = true });
 }
 
 pub inline fn syscall3(
@@ -27,7 +27,7 @@ pub inline fn syscall3(
           [arg2] "{x1}" (arg2),
           [arg3] "{x2}" (arg3),
           [number] "{x8}" (number),
-    );
+        : .{ .memory = true });
 }
 
 pub inline fn syscall4(
@@ -44,7 +44,7 @@ pub inline fn syscall4(
           [arg3] "{x2}" (arg3),
           [arg4] "{x3}" (arg4),
           [number] "{x8}" (number),
-    );
+        : .{ .memory = true });
 }
 
 pub inline fn syscall5(
@@ -63,7 +63,7 @@ pub inline fn syscall5(
           [arg4] "{x3}" (arg4),
           [arg5] "{x4}" (arg5),
           [number] "{x8}" (number),
-    );
+        : .{ .memory = true });
 }
 
 pub inline fn syscall6(
@@ -84,5 +84,5 @@ pub inline fn syscall6(
           [arg5] "{x4}" (arg5),
           [arg6] "{x5}" (arg6),
           [number] "{x8}" (number),
-    );
+        : .{ .memory = true });
 }

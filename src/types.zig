@@ -60,9 +60,9 @@ pub fn htonl(addr: u32) u32 {
 
 pub const Acccept4Flags = packed struct(u32) {
     _pad1: u11 = 0,
-    nonblock: bool,
+    nonblock: bool = false,
     _pad2: u7 = 0,
-    cloexec: bool,
+    cloexec: bool = false,
     _pad3: u12 = 0,
 };
 

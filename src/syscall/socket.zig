@@ -102,24 +102,27 @@ pub fn accept(fd: types.Fd, addr: ?*types.SockAddr, addrlen: ?*u32) !types.Fd {
 }
 
 pub fn accept4(fd: types.Fd, addr: ?*types.SockAddr, addrlen: ?*u32, flags: types.Accept4Flags) !types.Fd {
-    const ret = arch.impl.syscall4(arch.num.accept4, @intCast(fd), if (addr) |a| @intFromPtr(a) else 0, if (addrlen) |l| @intFromPtr(l) else 0, flags);
+    const ret = arch.impl.syscall4(
+        arch.num.accept4,
+        @bitCast(@as(isize, fd)),
+        if (addr) |a| @intFromPtr(a) else 0,
+        if (addrlen) |l| @intFromPtr(l) else 0,
+        @as(u32, @bitCast(flags)),
+    );
 
     if (ret < 0) {
         return switch (errno.fromRet(ret)) {
+            .SUCCESS => @intCast(ret),
             .BADF => error.InvalidFD,
             .NOTSOCK => error.NotASocket,
             .OPNOTSUPP => error.OperationNotSupported,
             .INVAL => error.InvalidArgument,
-            .AGAIN, .WOULDBLOCK => error.WouldBlock,
+            .AGAIN => error.WouldBlock,
             .INTR => error.Interrupted,
             .FAULT => error.BadAddress,
             .CONNABORTED => error.ConnectionAborted,
-            .PROTO, .EPROTO => error.ProtocolError,
-            .MFILE,
-            .NFILE,
-            .NOBUFS,
-            .NOMEM,
-            => error.SystemResources,
+            .PROTO => error.ProtocolError,
+            .MFILE, .NFILE, .NOBUFS, .NOMEM => error.SystemResources,
             .PERM => error.AccessDenied,
             .NETDOWN => error.NetworkDown,
             .NETUNREACH => error.NetworkUnreachable,
@@ -128,12 +131,10 @@ pub fn accept4(fd: types.Fd, addr: ?*types.SockAddr, addrlen: ?*u32, flags: type
             .NONET => error.NoNetwork,
             .NETRESET => error.NetworkReset,
             .TIMEDOUT => error.TimedOut,
-
-            .PROTOOPT => error.ProtocolOption,
+            .NOPROTOOPT => error.ProtocolOption,
             .PROTONOSUPPORT => error.ProtocolNotSupported,
             .SOCKTNOSUPPORT => error.SocketTypeNotSupported,
             .NOSR => error.NoStreamResources,
-
             else => error.Unexpected,
         };
     }
