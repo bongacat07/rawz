@@ -36,7 +36,6 @@ pub const E = enum(usize) {
     DOM = 33, // Math argument out of domain
     RANGE = 34, // Math result not representable
 
-    // Sockets / networking (the ones you'll actually hit soon)
     DEADLK = 35,
     NAMETOOLONG = 36,
     NOLCK = 37,

@@ -129,19 +129,33 @@ pub const Timespec = extern struct {
     }
 };
 pub const SendFlags = packed struct(u32) {
-    oob: bool = false,
-    _pad1: u2 = 0,
-    dontroute: bool = false,
-    _pad2: u5 = 0,
-    dontwait: bool = false,
-    _pad3: u1 = 0,
-    eor: bool = false,
-    _pad4: u3 = 0,
-    nosignal: bool = false,
-    more: bool = false,
-    _pad5: u8 = 0,
-    confirm: bool = false,
-    _pad6: u1 = 0,
-    fastopen: bool = false,
-    _pad7: u2 = 0,
+    oob: bool = false, // 0
+    _pad0: u1 = 0, // 1  (PEEK, recv only)
+    dontroute: bool = false, // 2
+    _pad1: u3 = 0, // 3-5
+    dontwait: bool = false, // 6
+    eor: bool = false, // 7
+    _pad2: u3 = 0, // 8-10
+    confirm: bool = false, // 11
+    _pad3: u2 = 0, // 12-13
+    nosignal: bool = false, // 14
+    more: bool = false, // 15
+    _pad4: u10 = 0, // 16-25
+    zerocopy: bool = false, // 26
+    _pad5: u2 = 0, // 27-28
+    fastopen: bool = false, // 29
+    _pad6: u2 = 0, // 30-31
+};
+
+pub const RecvFlags = packed struct(u32) {
+    oob: bool = false, // 0
+    peek: bool = false, // 1
+    _pad0: u3 = 0, // 2-4
+    trunc: bool = false, // 5
+    dontwait: bool = false, // 6
+    _pad1: u1 = 0, // 7
+    waitall: bool = false, // 8
+    _pad2: u4 = 0, // 9-12
+    errqueue: bool = false, // 13
+    _pad3: u18 = 0, // 14-31
 };

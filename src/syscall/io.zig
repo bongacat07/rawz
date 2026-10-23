@@ -64,13 +64,13 @@ pub fn close(fd: types.Fd) !void {
     }
 }
 
-pub fn send(fd: types.Fd, buf: []u8, flags: types.SendFlags) !usize {
+pub fn send(fd: types.Fd, buf: []const u8, flags: types.SendFlags) !usize {
     const ret = arch.impl.syscall6(
         arch.num.sendto,
         @intCast(fd),
         @intFromPtr(buf.ptr),
         buf.len,
-        @bitCast(flags),
+        @as(u32, @bitCast(flags)),
         0,
         0,
     );
@@ -96,7 +96,7 @@ pub fn send(fd: types.Fd, buf: []u8, flags: types.SendFlags) !usize {
             .NETDOWN => error.NetworkDown,
             .NETUNREACH => error.NetworkUnreachable,
             .HOSTUNREACH => error.HostUnreachable,
-            .EAFNOSUPPORT => error.AddressFamilyNotSupported,
+            .AFNOSUPPORT => error.AddressFamilyNotSupported,
             else => error.Unexpected,
         };
     }
@@ -106,7 +106,7 @@ pub fn send(fd: types.Fd, buf: []u8, flags: types.SendFlags) !usize {
 
 pub fn sendto(
     fd: types.Fd,
-    buf: []u8,
+    buf: []const u8,
     flags: types.SendFlags,
     addr: *const types.SockAddr,
 ) !usize {
@@ -115,7 +115,7 @@ pub fn sendto(
         @intCast(fd),
         @intFromPtr(buf.ptr),
         buf.len,
-        @bitCast(flags),
+        @as(u32, @bitCast(flags)),
         @intFromPtr(addr),
         @sizeOf(types.SockAddr),
     );
@@ -152,14 +152,14 @@ pub fn sendto(
 pub fn recv(
     fd: types.Fd,
     buf: []u8,
-    flags: types.SendFlags,
+    flags: types.RecvFlags,
 ) !usize {
     const ret = arch.impl.syscall6(
         arch.num.recvfrom,
         @intCast(fd),
         @intFromPtr(buf.ptr),
         buf.len,
-        @bitCast(flags),
+        @as(u32, @bitCast(flags)),
         0,
         0,
     );
@@ -187,7 +187,7 @@ pub fn recv(
 pub fn recvfrom(
     fd: types.Fd,
     buf: []u8,
-    flags: types.SendFlags,
+    flags: types.RecvFlags,
     addr: *types.SockAddr,
 ) !usize {
     var addrlen: u32 = @sizeOf(types.SockAddr);
@@ -197,7 +197,7 @@ pub fn recvfrom(
         @intCast(fd),
         @intFromPtr(buf.ptr),
         buf.len,
-        @bitCast(flags),
+        @as(u32, @bitCast(flags)),
         @intFromPtr(addr),
         @intFromPtr(&addrlen),
     );

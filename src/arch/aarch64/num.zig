@@ -36,3 +36,4 @@ pub const epoll_ctl = 21;
 // No standalone epoll_wait either because only epoll_pwait exists. Callers
 // implement epoll_wait as epoll_pwait with sigmask=NULL.
 pub const epoll_pwait = 22;
+pub const socketpair = 199;

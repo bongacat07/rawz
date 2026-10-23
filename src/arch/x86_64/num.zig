@@ -24,3 +24,4 @@ pub const poll = 7;
 pub const epoll_create1 = 291;
 pub const epoll_ctl = 233;
 pub const epoll_wait = 232;
+pub const socketpair = 53;
